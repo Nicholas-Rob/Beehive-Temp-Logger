@@ -2,8 +2,7 @@
 #include "adc.h"
 
 
-   //*     ADC     *//
-
+// Do a full single read from the ADC. [Initialize ADC, Sample ADC, Shutdown ADC]
 int readADC(void){
     initADC();
 
@@ -14,6 +13,8 @@ int readADC(void){
     return x;
 }
 
+
+// Initialize ADC0
 void initADC(void){
 
     // Disable conversion first
@@ -64,6 +65,7 @@ void initADC(void){
 }
 
 
+// Shutdown ADC0.
 void terminateADC(void){
 
     ADCCTL0 &= ~ADCENC;
@@ -73,6 +75,9 @@ void terminateADC(void){
     ADC_SET_FLAG = 0;
 }
 
+
+
+// Sample ADC0.
 int sampleADC(void){
 
     // Initialize internal Vref
@@ -82,11 +87,8 @@ int sampleADC(void){
         ADCCTL0 |= ADCENC | ADCSC;
 
 
+    // Wait for ADC to finish taking a sample.
     while ((ADCCTL1 & ADCBUSY) != 1);
-
-
-
-
 
 
 
@@ -103,6 +105,7 @@ int sampleADC(void){
 }
 
 
+// Initialize voltage reference registers.
 void initVref(void){
 
 
@@ -113,6 +116,8 @@ void initVref(void){
     for(i = 0; i < 10; i++);
 }
 
+
+// Shutdown use of voltage reference.
 void terminateVref(void){
 
     PMMCTL2 &= ~INTREFEN;
