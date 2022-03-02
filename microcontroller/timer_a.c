@@ -9,10 +9,8 @@
 // Apply desired configuration to TAxIV, TAIDEX and TAxCCTLn.
 // Apply desired configuration to TAxCTL including to MC bits
 
-const int COUNTS_PER_SECOND = 1000;
 
-// Used to keep track of the number of full counts of Timer A0
-volatile unsigned char count = 0;
+
 
 volatile int milliseconds = 0;
 volatile unsigned char seconds = 0;
