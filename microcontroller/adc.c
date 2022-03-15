@@ -4,11 +4,11 @@
 
 // Do a full single read from the ADC. [Initialize ADC, Sample ADC, Shutdown ADC]
 int readADC(void){
-    initADC();
+    //initADC();
 
     int x = sampleADC();
 
-    terminateADC();
+    //terminateADC();
 
     return x;
 }
@@ -39,7 +39,7 @@ void initADC(void){
 
 
     // Set sample and hold time
-    ADCCTL0 |= ADCSHT_2;
+    //ADCCTL0 |= ADCSHT_2;
 
 
     // Set conversion sequence mode to "single channel, single conversion"
@@ -62,11 +62,17 @@ void initADC(void){
     // Set status flag of ADC
     ADC_SET_FLAG = 1;
 
+    // Initialize internal Vref
+    initVref();
+
 }
 
 
 // Shutdown ADC0.
 void terminateADC(void){
+
+    // Disable internal Vref
+    terminateVref();
 
     ADCCTL0 &= ~ADCENC;
 
@@ -80,11 +86,10 @@ void terminateADC(void){
 // Sample ADC0.
 int sampleADC(void){
 
-    // Initialize internal Vref
-    initVref();
+
 
     // Enable ADC conversion and start conversion
-        ADCCTL0 |= ADCENC | ADCSC;
+    ADCCTL0 |= ADCENC | ADCSC;
 
 
     // Wait for ADC to finish taking a sample.
@@ -96,12 +101,28 @@ int sampleADC(void){
     int x = ADCMEM0;
 
     // Disable conversion
-    ADCCTL0 = ADCCTL0 & ~ADCENC;
+    ADCCTL0 &= ~ADCENC;
 
-    // Disable internal Vref
-    terminateVref();
+
 
     return x;
+}
+
+
+float GetVoltage(void){
+
+    int adcValue = sampleADC();
+
+    return ((((float)adcValue) / 1023.0) * 3.3);
+
+}
+
+
+float GetTemperature(void){
+
+    return 0.0f;
+
+    //float t =
 }
 
 

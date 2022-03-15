@@ -1,65 +1,125 @@
 #include <msp430.h>
 #include "adc.h"
 #include "spi.h"
+#include "timer_a.h"
+#include "datalogger.h"
+#include "bluetooth.h"
+#include <stdio.h>
 
 void formatCmd(char* data, char cmd, char a0, char a1, char a2, char a3, char crc);
 int sendCmd(char* data);
 
-/**
- * main.c
- */
+
+
 int main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 	
-	// Initialize SPI.
-	initSPI();
-
-
 	volatile int i = 0;
-	volatile int t = 0;
+
+	 //P6DIR |= BIT1;
+
+	 //P6REN = BIT1;
+	 //P6OUT &= ~BIT1;
+
+	//printf("test\n");
 
 
-	// Setup initialization command to be sent to MicroSD card reader.
-	int cmd = 0x40;
-	int crc = 0x95;
+	InitDataLogger();
 
-	// Setup command packet.
-	char data[6] = {cmd, 0, 0, 0, 0, crc};
+	InitTimer();
 
-
-	// Send command packet to Micro SD Card.
-	t = sendCmd(data);
-
-	// Format a command packet with the given data, insert it into "data" packet.
-	formatCmd(data, 8, 0,0,1,0xAA,0x87);
-
-
-	// Send packet.
-	t = sendCmd(data);
-
-
-	// TODO: Configure timing to match Micro SD card.
+	//LogData(&a);
 
 
 
-	// USED FOR TESTING:
-	// Sample voltage at ADC a few times.
-	for(i = 0; i < 3; i++){
+	 /*
+	 initSPI();
 
-	    // Sample ADC.
-	    volatile int x = readADC();
+	 volatile char data[6];
 
-	    // Convert ADC value into proper voltage value.
-	    volatile float v = ((((float)x) / 1023.0) * 3.3);
+	 for(i = 0; i < 6; i++){
+	     data[i] = 0;
+	 }
+
+	 // Init command for micro sd card.
+	 formatCmd(data, 0x40, 0x00, 0x00, 0x00, 0x00, 0x95);
 
 
-	}
+	 CSHI();
+
+
+	 for(i = 0; i < 20; i++){
+	     sendSPI(0xFF);
+	 }
+
+	 CSLO();
+
+	 sendSPI(0xFF);
+
+	 sendCmd(data);
+
+
+	 volatile char response[20];
+
+	 while(1){
+	     sendSPI(0xFF);
+	 }
+
+	 CSHI();
+
+
+	 //volatile int x = InitBT();
+
+    */
+
+	 //volatile int b = 0;
+
+
+
+
+	 // Start timer A0
+	 //InitTimer();
+
+
+
+	 // Enable all interrupts
+	 _BIS_SR(GIE);
+
+	 while(1){
+
+
+
+	     if(TimerIntFlag == 1){
+
+
+
+	         TimerIntFlag = 0;
+
+
+	         LogData(time);
+
+
+	     }
+
+
+	 }
 
 
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -79,27 +139,17 @@ int sendCmd(char* data){
 
     int i;
 
-    // Hold the select-enable down to send packet through SPI.
-    P2OUT &= ~BIT7;
-
-    transferSPI(0xFF);
-
     for(i = 0; i < 6; i++){
 
 
-        transferSPI(data[i]);
+        sendSPI(data[i]);
 
 
     }
 
-    // TODO: Correct the timing for the SPI communication to the Micro SD card.
-    int t = transferSPI(0xFF);
-
-    // Set the select-enable back to HIGH.
-    P2OUT |= BIT7;
+    return 1;
 
 
-    return t;
 }
 
 

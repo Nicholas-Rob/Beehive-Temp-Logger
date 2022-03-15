@@ -1,4 +1,5 @@
 #include <msp430.h>
+#include <stdlib.h>
 #include "timer_a.h"
 
 // Timer A0 Setup
@@ -9,17 +10,26 @@
 // Apply desired configuration to TAxIV, TAIDEX and TAxCCTLn.
 // Apply desired configuration to TAxCTL including to MC bits
 
+const int COUNTS_PER_SECOND = 20;
 
+// Used to keep track of the number of full counts of Timer A0
+volatile unsigned char count = 0;
 
+char TimerIntFlag = 0;
 
-volatile int milliseconds = 0;
-volatile unsigned char seconds = 0;
-volatile unsigned char minutes = 0;
-volatile unsigned char hours = 0;
+volatile int t_milliseconds = 0;
+volatile unsigned char t_seconds = 0;
+volatile unsigned char t_minutes = 0;
+volatile unsigned char t_hours = 0;
+volatile int t_days = 0;
+
+unsigned char* time = 0;
 
 
 // Initialize Timer A0
 void InitTimer(void){
+
+    time = (unsigned char*)malloc(2 * sizeof(unsigned char));
 
     // Clear Timer A settings.
     TA0CTL |= TACLR;
@@ -70,36 +80,54 @@ __interrupt void Timer_A(void){
 
 
     // Do event every millisecond
-
-
-    milliseconds++;
-
+    int flag = TA0IV;
 
 
 
-    if(milliseconds == 1000){
+    t_milliseconds++;
+
+
+
+
+    if(t_milliseconds == 1000){
         // Do event every second
 
-        // Used to debug timer. Should blink connected LED every second.
-        //P6OUT ^= BIT1;
 
-        seconds++;
-        milliseconds = 0;
+        t_seconds++;
+        t_milliseconds = 0;
+
+        //TimerIntFlag = 1;
+
     }
 
-    if(seconds == 60){
+    if(t_seconds == 60){
         // Do event every minute
-        minutes++;
-        seconds = 0;
+        t_minutes++;
+        t_seconds = 0;
+
+        time[0] = t_seconds;
+        time[1] = t_minutes;
+        TimerIntFlag = 1;
+
+
+
     }
 
-    if(minutes == 60){
+    if(t_minutes == 60){
         // Do event every hour
 
-        // Log data.
 
-        hours++;
-        minutes = 0;
+        t_hours++;
+
+        if(t_hours == 24){
+            t_days++;
+            t_hours = 0;
+        }
+
+        t_minutes = 0;
+
+
+        //LogData(time);
     }
 
 
