@@ -64,7 +64,7 @@ void LogData(unsigned char* time){
         // Disable internal Vref
 
 
-        sensor_data[sensor] = GetVoltage();
+        sensor_data[sensor] = GetTemperature();
 
         //printf("%d: %f\n", sensor, sensor_data[sensor]);
 

@@ -12,7 +12,7 @@ char ADC_SET_FLAG;
 int readADC(void);
 void initADC(void);
 void terminateADC(void);
-int sampleADC(void);
+void sampleADC(int* samples);
 float GetVoltage(void);
 float GetTemperature(void);
 
