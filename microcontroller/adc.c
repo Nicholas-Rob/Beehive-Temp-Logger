@@ -23,6 +23,8 @@ void initADC(void){
     P1SEL0 |= BIT2 | BIT1 | BIT0;
     P1SEL1 |= BIT2 | BIT1 | BIT0;
 
+    SYSCFG2 |= 0x7;
+
     PM5CTL0 &= ~LOCKLPM5;
 
     // Disable conversion first
@@ -42,8 +44,8 @@ void initADC(void){
     // Set sampling timer to MODOSC
     ADCCTL1 |= ADCSHP;
 
-    // Set input channel to be A0 to A2 in sequence mode.
-    ADCMCTL0 |= ADCINCH_2;
+    // Set input channel to be A0 to A11 in sequence mode.
+    ADCMCTL0 |= ADCINCH_11;
 
     // Set voltage references
     ADCMCTL0 |= ADCSREF_0;
@@ -53,7 +55,7 @@ void initADC(void){
     //ADCCTL0 |= ADCSHT_2;
 
     // Divide clock
-    ADCCTL1 |= ADCDIV_7;
+    ADCCTL1 |= ADCDIV_0;
 
     // Set conversion sequence mode to "sequence-of-channels"
     ADCCTL1 |= ADCCONSEQ_1;
@@ -62,7 +64,7 @@ void initADC(void){
 
     //ADCCTL1 &= ~(0x0C00);
 
-    // Set clk to SMCLK
+    // Set clk to MODOSC
     ADCCTL1 |= ADCSSEL_0;
 
 
@@ -71,7 +73,7 @@ void initADC(void){
 
 
     // Enable interrupt
-    ADCIE |= ADCIE0;
+    //ADCIE |= ADCIE0;
 
     // Set status flag of ADC
     ADC_SET_FLAG = 1;
@@ -109,7 +111,7 @@ void sampleADC(int* samples){
 
 
     int i;
-    for(i = 0; i < 3; i++){
+    for(i = 11; i >= 0; i--){
 
         ADCCTL0 |= ADCSC;
 
@@ -121,7 +123,11 @@ void sampleADC(int* samples){
     // Read results.
         samples[i] = ADCMEM0;
 
-        __delay_cycles(4000);
+        volatile int vals = samples[i];
+
+        __delay_cycles(2000);
+
+
 
     }
 
@@ -135,29 +141,32 @@ void sampleADC(int* samples){
 }
 
 
-float GetVoltage(void){
+void GetVoltage(float* volts){
 
-    int adcValues[3];
+    int adcValues[12];
 
     sampleADC(adcValues);
 
-    float x0 = ((((float)adcValues[2]) / 1023.0) * 3.3);
-    float x1 = ((((float)adcValues[1]) / 1023.0) * 3.3);
-    float x2 = ((((float)adcValues[0]) / 1023.0) * 3.3);
+    int i;
+    for(i = 0; i < 12; i++){
+        volts[i] = ((((float)adcValues[i]) / 1023.0) * 3.3);
+    }
 
 
 
-    return 0.0f;
+
+
 
 }
 
 
-float GetTemperature(void){
+void GetTemperature(float* temps){
 
-    int adcValues[3];
+    int adcValues[12];
 
     sampleADC(adcValues);
 
+    /*
     volatile float x0 = ((((float)adcValues[2]) / 1023.0f) * 3.3f);
     volatile float x1 = ((((float)adcValues[1]) / 1023.0f) * 3.3f);
     volatile float x2 = ((((float)adcValues[0]) / 1023.0f) * 3.3f);
@@ -165,12 +174,26 @@ float GetTemperature(void){
     volatile float vin = x0 - x2;
     volatile float vout = x1 - x2;
 
-    volatile float v = vout/vin;
+    volatile float v = // vout/vin;
 
 
     volatile float r_t = 10000.0f * (v/(1.0f-v));
 
-    return (1.0f/((log(r_t/10000.0f))/3380.0f)) - 298.2f;
+    volatile float fin = (1.0f/( (log(r_t/10000.0f)/3380.0f) + (1.0f/298.2f)) ) - 273.15f;
+
+    return fin;
+    */
+
+    float vin = ((((float)adcValues[11]) / 1023.0) * 3.3);
+
+    int i;
+    for(i = 0; i < 11; i++){
+        float volt = ((((float)adcValues[i]) / 1023.0) * 3.3);
+
+        volatile float r_t = 10000.0f * ((volt/vin)/(1.0f-(volt/vin)));
+
+        temps[i] = (1.0f/( (log(r_t/10000.0f)/3380.0f) + (1.0f/298.2f)) ) - 273.15f;
+    }
 }
 
 
@@ -180,7 +203,7 @@ void initVref(void){
 
     PMMCTL0_H = PMMPW_H;
     PMMCTL2 |= INTREFEN; // enable internal reference
-    PMMCTL2 |= REFVSEL_2; // set it to 2.5V.
+    //PMMCTL2 |= REFVSEL_2; // set it to 2.5V.
 
     int i = 0;
     for(i = 0; i < 10; i++);

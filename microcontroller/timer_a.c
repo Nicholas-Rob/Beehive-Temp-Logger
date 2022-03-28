@@ -15,7 +15,7 @@ const int COUNTS_PER_SECOND = 20;
 // Used to keep track of the number of full counts of Timer A0
 volatile unsigned char count = 0;
 
-char TimerIntFlag = 0;
+char TimerIntFlag = 1;
 
 volatile int t_milliseconds = 0;
 volatile unsigned char t_seconds = 0;
@@ -44,20 +44,21 @@ void InitTimer(void){
     // TA0CCR0 = 25000;
     //
     // Clock Divide = 8
-    // TA0CTL |= ID_3;
+    TA0CTL |= ID_3;
 
 
 
     // Store the value that the timer should count up to.
     // Is set to 1000 because the clock (SMCLK = 1 MHz), 1000 ticks = 1 millisecond.
     // For clock divide = 1, 1 count = 1 millisecond
-    TA0CCR0 = 1000;
+    TA0CCR0 = 31250;
 
     // Set capture mode to rising edge.
     TA0CCTL0 |= CM_1;
 
     // Enable CCR0 interrupts.
     TA0CCTL0 |= CCIE;
+
 
 
     // Set timer to use SMCLK as a source.
@@ -84,19 +85,18 @@ __interrupt void Timer_A(void){
 
 
 
-    t_milliseconds++;
+    t_seconds++;
 
 
 
 
-    if(t_milliseconds == 1000){
+    if(t_seconds == 10){
         // Do event every second
 
-
-        t_seconds++;
-        t_milliseconds = 0;
-
-        //TimerIntFlag = 1;
+        time[0] = t_seconds;
+                time[1] = t_minutes;
+                TimerIntFlag = 1;
+                t_seconds = 0;
 
     }
 

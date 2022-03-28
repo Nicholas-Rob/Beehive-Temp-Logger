@@ -23,7 +23,7 @@ char transferSD(char* data, char expResp, char tries){
 
              CSHI();
 
-             for(i = 0; i < 1; i++){
+             for(i = 0; i < 10; i++){
                  transferSPI(0xFF);
              }
 

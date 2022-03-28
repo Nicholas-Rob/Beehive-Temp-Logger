@@ -14,13 +14,13 @@ void InitDataLogger(void){
     P4OUT &= ~BIT1;
     P3OUT &= ~BIT1;
 
-    P2OUT &= ~BIT4;
+    P2OUT &= ~BIT1;
 
     P6DIR |= BIT2;
     P4DIR |= BIT1;
     P3DIR |= BIT1;
 
-    P2DIR |= BIT4;
+    P2DIR |= BIT1;
 
     PM5CTL0 &= ~LOCKLPM5;
 }
@@ -28,59 +28,35 @@ void InitDataLogger(void){
 void LogData(unsigned char* time){
 
 
-    P2OUT |= BIT4;
+    P2OUT |= BIT1;
+
+    volatile float sensors[12];
+
+    volatile char t[2];
+    t[0] = time[0];
+    t[1] = time[1];
 
     initADC();
 
     char sensor = 0;
-    for(sensor = 0; sensor < NUM_SENSORS; sensor++){
 
-        P6OUT &= ~BIT2;
-        P4OUT &= ~BIT1;
-        P3OUT &= ~BIT1;
-
-        if((sensor & 0x1) == 0x1){
-            P6OUT |= BIT2;
-        }
-
-        if((sensor & 0x2) == 0x2){
-            P4OUT |= BIT1;
-        }
-
-        if((sensor & 0x4) == 0x4){
-            P3OUT |= BIT1;
-        }
-
-        /*
-        P6OUT |= ((sensor & 0x1) << 2);
-        P4OUT |= (sensor & 0x2);
-        P3OUT |= (sensor & 0x4) >> 1;
-        */
 
 
 
         __delay_cycles(100);
 
-        // Disable internal Vref
+        GetTemperature(sensors);
 
-
-        sensor_data[sensor] = GetTemperature();
-
-        //printf("%d: %f\n", sensor, sensor_data[sensor]);
-
-    }
 
 
 
     terminateADC();
 
-    P2OUT &= ~BIT4;
+    P2OUT &= ~BIT1;
 
 
-    //float temperature = GetTemperature();
+    volatile int aaf = 2;
 
-
-    //AppendMicroSD(time, temperature);
 
 
 

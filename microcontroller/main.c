@@ -9,14 +9,12 @@
 
 
 
-int main(void)
-{
+int main(void){
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-	
+	CSCTL5 |= DIVS_2; // Divide smclk by 4 // (1MHz / 4)
 	volatile int i = 0;
 
-	// Enable all interrupts
-	//_BIS_SR(GIE);
+
 
 
 
@@ -47,7 +45,7 @@ int main(void)
 	 */
 
 
-
+/*
 	initADC();
 
 	int adcValues[3];
@@ -56,7 +54,7 @@ int main(void)
 
 	terminateADC();
 
-	 volatile char bb = 0; // Debug stop
+	 volatile char bb = 0; // Debug stop */
 
 
 
@@ -65,13 +63,16 @@ int main(void)
 
 
 
-	 /*// Log Temperature when timer interrupt flag is set.
+	 // Log Temperature when timer interrupt flag is set.
 
-	 //InitDataLogger();
+	InitDataLogger();
 
-    //InitTimer();
+    InitTimer();
 
-    //LogData(&a);
+
+
+     // Enable all interrupts
+    _BIS_SR(GIE);
 
 	 while(1){
 
@@ -90,7 +91,8 @@ int main(void)
 	     }
 
 
-	 } */
+	 }
+
 
 
 

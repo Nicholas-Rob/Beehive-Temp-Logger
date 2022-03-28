@@ -13,8 +13,8 @@ int readADC(void);
 void initADC(void);
 void terminateADC(void);
 void sampleADC(int* samples);
-float GetVoltage(void);
-float GetTemperature(void);
+void GetVoltage(float* volts);
+void GetTemperature(float* temps);
 
 void initVref(void);
 void terminateVref(void);
